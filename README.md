@@ -17,18 +17,62 @@ First clone the repository `git clone https://github.com/usil/eventhos.git`. The
 
 After that run `docker-compose up -d --build`. This will deploy 3 apps in docker, first a mysql data base with the eventhos model, then the [eventhos-api](https://github.com/usil/eventhos-api) and finally [eventhos-web](https://github.com/usil/eventhos-web).
 
+If everting worked go to `http://localhost:2110` and you will see this:
+
+![login](https://i.ibb.co/51kZBTy/eventhos-login.jpg)
+
+### Getting the admin username and password
+
+In a command line:
+
+First access to eventhos-api in docker.
+
+```cmd
+  docker exec -it eventhos-web bash
+```
+
+After that update `apt-get`.
+
+```cmd
+  apt-get update
+```
+
+Install nano.
+
+```cmd
+  apt-get install nano
+```
+
+Open the credentials.txt file.
+
+```cmd
+  nano credentials.txt
+```
+
+Your credentials will look something like this.
+
+```txt
+Credentials for the admin user in it.
+
+          Username: admin
+
+          Password: secret
+          Credentials for the admin client.
+
+          client_id: clientId
+
+          client_secret: secret
+```
+
 ### Default ports
 
 The api will run by default in the port `2109`. you can change this behavior by modifying the environment variable `PORT` in the docker compose file. If you decided to change the port also modify the environment variable `URL` in `eventhos-web` part of the docker compose file to reflect the new port.
 
-The web will run in the port `2110`, to change it you will need to modify the package.json inside eventhos-web.
+The web will run in the port `2110`, to change it you will need to modify the package.json inside eventhos-web, in the following line.
 
 ```json
 {
-    /// change 2110 to the desired port
-    ...
   "start": "nodeboot-spa-server dist/template-dashboard -s settings.json -p 2110 --allow-routes"
-    ...
 }
 ```
 
