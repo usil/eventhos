@@ -13,7 +13,7 @@ To know more about each library check their git repository.
 
 ## Usage
 
-First clone the repository `git clone link`. Then run `git submodule update --init`.
+First clone the repository `git clone https://github.com/usil/eventhos.git`. Then run `git submodule update --init`.
 
 After that run `docker-compose up -d --build`. This will deploy 3 apps in docker, first a mysql data base with the eventhos model, then the [eventhos-api](https://github.com/usil/eventhos-api) and finally [eventhos-web](https://github.com/usil/eventhos-web).
 
