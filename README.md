@@ -31,25 +31,13 @@ First access to eventhos-api in docker.
   docker exec -it eventhos-web bash
 ```
 
-After that update `apt-get`.
+To read the credentials files
 
 ```cmd
-  apt-get update
+  cat credentials.txt
 ```
 
-Install nano.
-
-```cmd
-  apt-get install nano
-```
-
-Open the credentials.txt file.
-
-```cmd
-  nano credentials.txt
-```
-
-Your credentials will look something like this.
+Then you will get your credentials
 
 ```txt
 Credentials for the admin user in it.
