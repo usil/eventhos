@@ -1,0 +1,6 @@
+[submodule "eventhos-web"]
+	path = eventhos-web
+	url = https://github.com/usil/eventhos-web
+[submodule "eventhos-api"]
+	path = eventhos-api
+	url = https://github.com/usil/eventhos-api
