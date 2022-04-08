@@ -30,10 +30,13 @@ services:
       DATA_BASE_USER: "usr_eventhos"
       DATA_BASE_PASSWORD: "abcdefg"
       NODE_ENV: "production"
-      CPU_COUNT: 1
+      CPU_COUNT: 3
       PORT: 2109
       JWT_SECRET: "secret"
       CRYPTO_KEY: "secret_key"
+      DATA_BASE_ACQUIRE_CONNECTION_TIMEOUT: 10000
+      DATA_BASE_POOL_MAX: 300
+      DATA_BASE_POOL_MIN: 100
     healthcheck:
       test: curl --fail http://localhost:2109 || exit 1
       interval: 10s
@@ -53,7 +56,7 @@ services:
           memory: 1024M
   eventhos-db:
     image: mysql:5.7
-    command: mysqld --sql_mode="" --general-log=1 --general-log-file=/var/log/mysql/general-log.log
+    command: mysqld --sql_mode="" --max_connections=1100 --general-log=1 --general-log-file=/var/log/mysql/general-log.log
     container_name: eventhos-db
     ports:
       - "3306:3306"
