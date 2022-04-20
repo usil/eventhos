@@ -102,6 +102,7 @@ environment:
   QUEUE_USER: eventhos
   QUEUE_PASSWORD: secret
   QUEUE_DESTINATION: eventhos
+  QUEUE_HEART_BEAT: 0,0
 ```
 
 ## Contributors
