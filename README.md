@@ -64,6 +64,47 @@ The web will run in the port `2110`, to change it you will need to modify the pa
 }
 ```
 
+### Using it with ActiveMQ
+
+This repository has everting ready to use activemq or any queue manager. For this you will need to run the `docker-compose-queue.yml` file with `docker-compose -f docker-compose-queue.yml up --build -d eventhos-api`.
+
+This docker-compose file will add the following:
+
+```yml
+eventhos-activemq:
+  image: webcenter/activemq:latest
+  container_name: activemq
+  ports:
+    - 8161:8161
+    - 61616:61616
+    - 61613:61613
+  environment:
+    # ACTIVEMQ_CONFIG_NAME: eventhos
+    ACTIVEMQ_CONFIG_MINMEMORY: 512
+    ACTIVEMQ_CONFIG_MAXMEMORY: 1024
+    ACTIVEMQ_CONFIG_DEFAULTACCOUNT: false
+    ACTIVEMQ_ADMIN_LOGIN: admin
+    ACTIVEMQ_ADMIN_PASSWORD: admin
+    ACTIVEMQ_USERS_eventhos: secret
+    ACTIVEMQ_GROUPS_owners: eventhos
+    JAVA_OPTS: -Dfile.encoding=UTF-8
+    TZ: America/Lima
+  restart: always
+```
+
+Modify those variables as you like but keep it mind to also change the variables in the `eventhos-api` service:
+
+```yml
+environment:
+  USE_QUEUE: true
+  QUEUE_HOST: host.docker.internal
+  QUEUE_PORT: 61613
+  QUEUE_USER: eventhos
+  QUEUE_PASSWORD: secret
+  QUEUE_DESTINATION: eventhos
+  QUEUE_HEART_BEAT: 0,0
+```
+
 ## Contributors
 
 <table>
