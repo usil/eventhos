@@ -75,10 +75,13 @@ then
   echo "EVENTHOS_API_PORT=$EVENTHOS_API_PORT" >> .env
 fi
 
+# https://stackoverflow.com/a/50850881
+
 if [ "$build" == "true" ]; then
+  docker-compose down
   delete_image_if_exist "eventhos_eventhos-web"
   delete_image_if_exist "eventhos_eventhos-api"
-  docker-compose down && docker-compose up -d --build
+  docker-compose up -d --build
 else
   docker-compose down && docker-compose up -d
 fi

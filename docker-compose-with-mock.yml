@@ -99,7 +99,7 @@ services:
     deploy:
       resources:
         limits:
-          memory: 128M            
+          memory: 128M
 networks:
   app_network:
     driver: bridge
