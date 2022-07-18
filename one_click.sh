@@ -41,14 +41,15 @@ cd $workspaces_path
 export JWT_SECRET=$(uuidgen)
 export CRYPTO_KEY=$(uuidgen)
 export MYSQL_PASSWORD=$(uuidgen)
-export MYSQL_PASSWORD=$(uuidgen)
 
 if [ ! -f .env ]; then
   echo "" > .env
 else
-  echo ".env file already exist"
-  cat .env
-  export $(cat .env | xargs)
+  if [ -s .env ]; then
+    echo ".env is empty"
+  else
+    export $(cat .env | xargs)
+  fi
 fi
 
 if [[ -z "$EVENTHOS_API_BASE_URL" ]]
