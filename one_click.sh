@@ -20,18 +20,21 @@ echo "#################"
 echo "Updating source code"
 echo "#################"
 
+git submodule update --init
+
 cd $workspaces_path/eventhos-api
 git fetch
 latest_branch=$(git for-each-ref --sort=-committerdate | head -n 1 | awk -F '/' '{ print $NF }')
+echo "latest_branch: $latest_branch"
 git checkout $latest_branch
 git pull origin $latest_branch
 
 cd $workspaces_path/eventhos-web
 git fetch
 latest_branch=$(git for-each-ref --sort=-committerdate | head -n 1 | awk -F '/' '{ print $NF }')
+echo "latest_branch: $latest_branch"
 git checkout $latest_branch
 git pull origin $latest_branch
-
 
 echo "#################"
 echo "Launching"
@@ -46,9 +49,9 @@ if [ ! -f .env ]; then
   echo "" > .env
 else
   if [ -s .env ]; then
-    echo ".env is empty"
-  else
     export $(cat .env | xargs)
+  else
+    echo ".env is empty"
   fi
 fi
 

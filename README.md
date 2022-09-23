@@ -123,3 +123,25 @@ environment:
     </td>
   </tbody>
 </table>
+
+
+  mock-api:
+    build:
+      context: ./mock-api
+      dockerfile: Dockerfile
+    container_name: mock-api
+    ports:
+      - "9000:9000"
+    environment:
+      PORT: "9000"
+    depends_on:
+      eventhos-api:
+        condition: service_healthy
+    networks:
+      - app_network
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    deploy:
+      resources:
+        limits:
+          memory: 128M            
