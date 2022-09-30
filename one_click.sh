@@ -57,18 +57,10 @@ fi
 
 if [[ -z "$EVENTHOS_API_BASE_URL" ]]
 then
-  echo "Enter EVENTHOS_API_BASE_URL: http://localhost:2109, http://10.20.30.40:2109 or https://eventhos.foo.com"
+  echo "Enter EVENTHOS_API_BASE_URL: "
   read _EVENTHOS_API_BASE_URL
   export EVENTHOS_API_BASE_URL=$_EVENTHOS_API_BASE_URL
   echo "EVENTHOS_API_BASE_URL=$EVENTHOS_API_BASE_URL" >> .env
-fi
-
-if [[ -z "$EVENTHOS_WEB_PORT" ]]
-then
-  echo "Enter EVENTHOS_WEB_BASE_URL: (2110) "
-  read _EVENTHOS_WEB_PORT
-  export EVENTHOS_WEB_PORT=$_EVENTHOS_WEB_PORT
-  echo "EVENTHOS_WEB_PORT=$EVENTHOS_WEB_PORT" >> .env
 fi
 
 if [[ -z "$EVENTHOS_API_PORT" ]]
@@ -77,6 +69,14 @@ then
   read _EVENTHOS_API_PORT
   export EVENTHOS_API_PORT=$_EVENTHOS_API_PORT
   echo "EVENTHOS_API_PORT=$EVENTHOS_API_PORT" >> .env
+fi
+
+if [[ -z "$EVENTHOS_WEB_PORT" ]]
+then
+  echo "Enter EVENTHOS_WEB_PORT: (2110) "
+  read _EVENTHOS_WEB_PORT
+  export EVENTHOS_WEB_PORT=$_EVENTHOS_WEB_PORT
+  echo "EVENTHOS_WEB_PORT=$EVENTHOS_WEB_PORT" >> .env
 fi
 
 # https://stackoverflow.com/a/50850881
