@@ -1,4 +1,13 @@
-workspaces_path=$(pwd)
+workspace_location=$(pwd)
+
+# get input arguments
+for ARGUMENT in "$@"
+do
+   KEY=$(echo $ARGUMENT | cut -f1 -d=)
+   KEY_LENGTH=${#KEY}
+   VALUE="${ARGUMENT:$KEY_LENGTH+1}"
+   export "$KEY"="$VALUE"
+done
 
 function delete_image_if_exist {
   image=$(docker images "$1" -a -q)
@@ -8,84 +17,119 @@ function delete_image_if_exist {
   fi
 }
 
-for ARGUMENT in "$@"
-do
-   KEY=$(echo $ARGUMENT | cut -f1 -d=)
-   KEY_LENGTH=${#KEY}
-   VALUE="${ARGUMENT:$KEY_LENGTH+1}"
-   export "$KEY"="$VALUE"
-done
+
 
 echo "#################"
 echo "Updating source code"
 echo "#################"
 
-git submodule update --init
+if [ -z "$skip_update_code" ] && [ ! "$skip_update_code" == "true" ]; then
 
-cd $workspaces_path/eventhos-api
-git fetch
-latest_branch=$(git for-each-ref --sort=-committerdate | head -n 1 | awk -F '/' '{ print $NF }')
-echo "latest_branch: $latest_branch"
-git checkout $latest_branch
-git pull origin $latest_branch
+  while IFS="" read -r git_repository_url || [ -n "$git_repository_url" ]
+  do    
+    repository_name=$(echo "$git_repository_url" | cut -d / -f 2 | cut -d . -f 1)
+    echo "$repository_name"
 
-cd $workspaces_path/eventhos-web
-git fetch
-latest_branch=$(git for-each-ref --sort=-committerdate | head -n 1 | awk -F '/' '{ print $NF }')
-echo "latest_branch: $latest_branch"
-git checkout $latest_branch
-git pull origin $latest_branch
+    if [ -z "$repository_name" ]; then
+      continue
+    fi
+
+    rm -rf $workspace_location/$repository_name
+
+    cd $workspace_location
+    if [ "$latest_branch" == "true" ]; then
+      echo "git clone git@github.com:usil/$repository_name.git"
+      git clone git@github.com:usil/$repository_name.git
+      cd $workspace_location/$repository_name
+      git fetch
+      branch=$(git for-each-ref --sort=-committerdate | head -n 1 | awk -F '/' '{ print $NF }')
+      git checkout $branch
+      git pull origin $branch
+    else
+      echo "git clone git@github.com:usil/$repository_name.git -b main"
+      git clone git@github.com:usil/$repository_name.git -b main
+    fi  
+
+  done < repositories.txt  
+
+fi
+
 
 echo "#################"
 echo "Launching"
 echo "#################"
-cd $workspaces_path
+cd $workspace_location
 
-export JWT_SECRET=$(uuidgen)
-export CRYPTO_KEY=$(uuidgen)
-export MYSQL_PASSWORD=$(uuidgen)
+if [ -z "${config_mode}" ]; then
+  export config_mode=default
+fi
 
-if [ ! -f .env ]; then
-  echo "" > .env
+case "$config_mode" in
+
+  default)
+    echo  "config mode: default"
+    export JWT_SECRET=$(uuidgen)
+    export CRYPTO_KEY=$(uuidgen)
+    export MYSQL_PASSWORD=$(uuidgen)
+    local_ip="$(hostname -I | awk '{print $1}')"
+    export EVENTHOS_API_BASE_URL=http://$local_ip:2109
+    ;;
+
+  expert)
+    echo  "config mode: expert"
+    if [ ! -f .env ]; then
+      echo "" > .env
+    else
+      if [ -s .env ]; then
+        export $(cat .env | xargs)
+      else
+        echo ".env is empty"
+      fi
+    fi
+
+    if [[ -z "$EVENTHOS_API_BASE_URL" ]]
+    then
+      echo "Enter EVENTHOS_API_BASE_URL: "
+      read _EVENTHOS_API_BASE_URL
+      export EVENTHOS_API_BASE_URL=$_EVENTHOS_API_BASE_URL
+      echo "EVENTHOS_API_BASE_URL=$EVENTHOS_API_BASE_URL" >> .env
+    fi
+
+    if [[ -z "$EVENTHOS_API_PORT" ]]
+    then
+      echo "Enter EVENTHOS_API_PORT: (2109) "
+      read _EVENTHOS_API_PORT
+      export EVENTHOS_API_PORT=$_EVENTHOS_API_PORT
+      echo "EVENTHOS_API_PORT=$EVENTHOS_API_PORT" >> .env
+    fi
+
+    if [[ -z "$EVENTHOS_WEB_PORT" ]]
+    then
+      echo "Enter EVENTHOS_WEB_PORT: (2110) "
+      read _EVENTHOS_WEB_PORT
+      export EVENTHOS_WEB_PORT=$_EVENTHOS_WEB_PORT
+      echo "EVENTHOS_WEB_PORT=$EVENTHOS_WEB_PORT" >> .env
+    fi    
+    ;;
+
+  *)
+esac
+
+composer_file=
+if [ ! -z "$custom_composer_file" ]; then
+  composer_file=$custom_composer_file
 else
-  if [ -s .env ]; then
-    export $(cat .env | xargs)
-  else
-    echo ".env is empty"
-  fi
+  composer_file=docker-compose.yml
 fi
 
-if [[ -z "$EVENTHOS_API_BASE_URL" ]]
-then
-  echo "Enter EVENTHOS_API_BASE_URL: "
-  read _EVENTHOS_API_BASE_URL
-  export EVENTHOS_API_BASE_URL=$_EVENTHOS_API_BASE_URL
-  echo "EVENTHOS_API_BASE_URL=$EVENTHOS_API_BASE_URL" >> .env
-fi
-
-if [[ -z "$EVENTHOS_API_PORT" ]]
-then
-  echo "Enter EVENTHOS_API_PORT: (2109) "
-  read _EVENTHOS_API_PORT
-  export EVENTHOS_API_PORT=$_EVENTHOS_API_PORT
-  echo "EVENTHOS_API_PORT=$EVENTHOS_API_PORT" >> .env
-fi
-
-if [[ -z "$EVENTHOS_WEB_PORT" ]]
-then
-  echo "Enter EVENTHOS_WEB_PORT: (2110) "
-  read _EVENTHOS_WEB_PORT
-  export EVENTHOS_WEB_PORT=$_EVENTHOS_WEB_PORT
-  echo "EVENTHOS_WEB_PORT=$EVENTHOS_WEB_PORT" >> .env
-fi
+echo "docker-compose file: $composer_file"
 
 # https://stackoverflow.com/a/50850881
-
 if [ "$build" == "true" ]; then
-  docker-compose down
+  docker-compose -f $composer_file down
   delete_image_if_exist "eventhos_eventhos-web"
   delete_image_if_exist "eventhos_eventhos-api"
-  docker-compose up -d --build
+  docker-compose  -f $composer_file up -d --build
 else
-  docker-compose down && docker-compose up -d
+  docker-compose  -f $composer_file down && docker-compose  -f $composer_file up
 fi

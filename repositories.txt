@@ -1,0 +1,2 @@
+git@github.com:usil/eventhos-api.git
+git@github.com:usil/eventhos-web.git
