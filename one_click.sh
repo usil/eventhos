@@ -38,16 +38,16 @@ if [ -z "$skip_update_code" ] && [ ! "$skip_update_code" == "true" ]; then
 
     cd $workspace_location
     if [ "$latest_branch" == "true" ]; then
-      echo "git clone git@github.com:usil/$repository_name.git"
-      git clone git@github.com:usil/$repository_name.git
+      echo "git clone $git_repository_url"
+      git clone $git_repository_url
       cd $workspace_location/$repository_name
       git fetch
       branch=$(git for-each-ref --sort=-committerdate | head -n 1 | awk -F '/' '{ print $NF }')
       git checkout $branch
       git pull origin $branch
     else
-      echo "git clone git@github.com:usil/$repository_name.git -b main"
-      git clone git@github.com:usil/$repository_name.git -b main
+      echo "git clone $git_repository_url -b main"
+      git clone $git_repository_url -b main
     fi  
 
   done < repositories.txt  
