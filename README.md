@@ -19,7 +19,7 @@ To know more about each library check their git repository.
 Download the stable version
 
 ```sh
-bash one_click.sh build=true
+bash one_click.sh build=true  latest_branch=true
 ```
 
 ## Usage: Integration Test

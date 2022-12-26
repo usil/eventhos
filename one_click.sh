@@ -21,6 +21,7 @@ function delete_image_if_exist {
 
 echo "#################"
 echo "Updating source code"
+echo "skip_update_code: $skip_update_code"
 echo "#################"
 
 if [ -z "$skip_update_code" ] && [ ! "$skip_update_code" == "true" ]; then
