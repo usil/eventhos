@@ -28,12 +28,17 @@ if [ -z "$skip_update_code" ] && [ ! "$skip_update_code" == "true" ]; then
 
   while IFS="" read -r git_repository_url || [ -n "$git_repository_url" ]
   do    
-    repository_name=$(echo "$git_repository_url" | cut -d / -f 2 | cut -d . -f 1)
-    echo "$repository_name"
 
+    echo "cloning $git_repository_url"
+    repository_name=$(echo "$git_repository_url"  | rev |  cut -d / -f 1 | rev | cut -d . -f 1)
+    
     if [ -z "$repository_name" ]; then
-      continue
+      echo "cannot obtain repository name from $git_repository_url"
+      echo "check if repositories.txt has valid git clone urls and try again"
+      exit 666
     fi
+
+    echo "repository_name: $repository_name"
 
     rm -rf $workspace_location/$repository_name
 
