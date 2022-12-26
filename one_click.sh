@@ -135,7 +135,7 @@ if [ "$build" == "true" ]; then
   docker-compose -f $composer_file down
   delete_image_if_exist "eventhos_eventhos-web"
   delete_image_if_exist "eventhos_eventhos-api"
-  docker-compose  -f $composer_file up -d --build
+  docker-compose -f $composer_file up -d --build --force-recreate --no-deps
 else
   docker-compose  -f $composer_file down && docker-compose  -f $composer_file up
 fi

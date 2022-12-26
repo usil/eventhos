@@ -28,6 +28,14 @@ bash one_click.sh build=true  latest_branch=true
 bash one_click.sh  custom_composer_file=docker-compose-integration-tests.yml  build=true latest_branch=true
 ```
 
+## Previous containers
+
+If you have previous executions of docker-compose and you don't have any other container in this server, you could execute this to :pushpin: **REMOVE ALL THE CONTAINER IN THIS MACHINE ** :pushpin:
+
+```
+docker ps -aq | xargs docker stop | xargs docker rm
+```
+
 ## Home Page
 
 If everting worked go to `http://localhost:2110` and you will see this:
