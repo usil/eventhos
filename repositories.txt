@@ -1,2 +1,2 @@
-https://github.com/iSkyNavy/eventhos-api.git
-https://github.com/iSkyNavy/eventhos-web.git
+git@github.com:iSkyNavy/eventhos-api.git
+git@github.com:iSkyNavy/eventhos-web.git

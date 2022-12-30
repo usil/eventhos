@@ -115,7 +115,32 @@ case "$config_mode" in
       read _EVENTHOS_WEB_PORT
       export EVENTHOS_WEB_PORT=$_EVENTHOS_WEB_PORT
       echo "EVENTHOS_WEB_PORT=$EVENTHOS_WEB_PORT" >> .env
-    fi    
+    fi 
+
+
+    if [[ -z "$JWT_SECRET" ]]
+    then
+      echo "Enter JWT_SECRET: "
+      read _JWT_SECRET
+      export JWT_SECRET=$_JWT_SECRET
+      echo "JWT_SECRET=$JWT_SECRET" >> .env
+    fi 
+
+    if [[ -z "$CRYPTO_KEY" ]]
+    then
+      echo "Enter CRYPTO_KEY:"
+      read _CRYPTO_KEY
+      export CRYPTO_KEY=$_CRYPTO_KEY
+      echo "CRYPTO_KEY=$CRYPTO_KEY" >> .env
+    fi 
+
+    if [[ -z "$MYSQL_PASSWORD" ]]
+    then
+      echo "Enter MYSQL_PASSWORD: "
+      read _MYSQL_PASSWORD
+      export MYSQL_PASSWORD=$_MYSQL_PASSWORD
+      echo "MYSQL_PASSWORD=$MYSQL_PASSWORD" >> .env
+    fi                
     ;;
 
   *)
@@ -130,12 +155,29 @@ fi
 
 echo "docker-compose file: $composer_file"
 
+
+if [ "$save_database" == "true" ]; then
+  docker-compose rm -s -v eventhos-web
+  docker-compose rm -s -v eventhos-api
+else
+  docker-compose -f $composer_file down    
+fi
+
 # https://stackoverflow.com/a/50850881
 if [ "$build" == "true" ]; then
-  docker-compose -f $composer_file down
   delete_image_if_exist "eventhos_eventhos-web"
   delete_image_if_exist "eventhos_eventhos-api"
-  docker-compose -f $composer_file up -d --build --force-recreate --no-deps
+
+  if [ "$save_database" == "true" ]; then
+    docker-compose -f $composer_file up -d --build --force-recreate --no-deps eventhos-web eventhos-api
+  else
+    docker-compose -f $composer_file up -d --build --force-recreate --no-deps
+  fi
 else
-  docker-compose  -f $composer_file down && docker-compose  -f $composer_file up
+  if [ "$save_database" == "true" ]; then
+    docker-compose  -f $composer_file up -d eventhos-web eventhos-api
+  else
+    docker-compose  -f $composer_file up -d
+  fi
+  
 fi

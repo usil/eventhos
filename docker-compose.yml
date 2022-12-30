@@ -8,6 +8,7 @@ services:
       - "3306:3306"
     volumes:
       - ./eventhos-api/database:/docker-entrypoint-initdb.d
+      - ${HOME}/mysql_data:/var/lib/mysql
     environment:
       MYSQL_ROOT_PASSWORD: ${MYSQL_PASSWORD:-changeme}
       MYSQL_PASSWORD: ${MYSQL_PASSWORD:-changeme}
@@ -43,6 +44,7 @@ services:
       DATA_BASE_ACQUIRE_CONNECTION_TIMEOUT: 10000
       DATA_BASE_POOL_MAX: 300
       DATA_BASE_POOL_MIN: 100
+      TZ: America/Lima
     healthcheck:
       test: curl --fail http://localhost:2109 || exit 1
       interval: 10s
@@ -69,6 +71,7 @@ services:
       - "${EVENTHOS_WEB_PORT:-2110}:2110"
     environment:
       EVENTHOS_API_BASE_URL: "${EVENTHOS_API_BASE_URL:-http://localhost:2109}"
+      TZ: America/Lima
     depends_on:
       eventhos-api:
         condition: service_healthy
