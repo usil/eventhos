@@ -8,7 +8,6 @@ services:
       - "3306:3306"
     volumes:
       - ./eventhos-api/database:/docker-entrypoint-initdb.d
-      - ${HOME}/mysql_data:/var/lib/mysql
     environment:
       MYSQL_ROOT_PASSWORD: ${MYSQL_PASSWORD:-changeme}
       MYSQL_PASSWORD: ${MYSQL_PASSWORD:-changeme}
@@ -31,17 +30,19 @@ services:
     ports:
       - "${EVENTHOS_API_PORT:-2109}:2109"
     environment:
+      NODE_ENV: "production"
+      CPU_COUNT: 1
+      PORT: 2109      
       DATA_BASE_NAME: "eventhos"
       DATA_BASE_HOST: host.docker.internal
       DATA_BASE_PORT: 3306
       DATA_BASE_USER: "usr_eventhos"
       DATA_BASE_PASSWORD: ${MYSQL_PASSWORD:-changeme}
-      NODE_ENV: "production"
-      CPU_COUNT: 1
-      PORT: 2109
+      DATA_BASE_POOL_MAX: 300
+      DATA_BASE_POOL_MIN: 100
+      DATA_BASE_ACQUIRE_CONNECTION_TIMEOUT: 10000
       JWT_SECRET: ${JWT_SECRET:-changeme}
       CRYPTO_KEY: ${CRYPTO_KEY:-changeme}
-      DATA_BASE_ACQUIRE_CONNECTION_TIMEOUT: 10000
       SMTP_HOST: ${SMTP_HOST}
       SMTP_PORT: ${SMTP_PORT}
       SMTP_USER: ${SMTP_USER}
