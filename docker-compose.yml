@@ -48,7 +48,7 @@ services:
       SMTP_PORT: ${SMTP_PORT}
       SMTP_USER: ${SMTP_USER}
       SMTP_PASSWORD: ${SMTP_PASSWORD}
-      SMTP_SECURE: "true"
+      SMTP_SECURE: ${SMTP_SECURE}
       SMTP_TLS_CIPHERS: SSLv3
       SMTP_DEFAULT_RECIPIENT: ${SMTP_DEFAULT_RECIPIENT}      
       TZ: America/Lima
