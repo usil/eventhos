@@ -55,6 +55,11 @@ const createServer = () => {
     return res.json({ message: "cleanup completed" });
   });
 
+  app.post("/error", (_req, res) => {
+    res.status(500);
+    return res.json({ message: "error" });
+  })
+
   return app;
 };
 

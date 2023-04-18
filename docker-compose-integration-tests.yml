@@ -20,7 +20,7 @@ services:
           memory: 512M
     healthcheck:
       test: 'cat /tmp/mysql-general-log.log | grep "root@localhost on  using Socket"'
-      interval: 10s
+      interval: 20s
       retries: 120
   eventhos-api:
     build:
@@ -43,6 +43,9 @@ services:
       DATA_BASE_ACQUIRE_CONNECTION_TIMEOUT: 10000
       JWT_SECRET: ${JWT_SECRET:-changeme}
       CRYPTO_KEY: ${CRYPTO_KEY:-changeme}
+      DATA_BASE_ACQUIRE_CONNECTION_TIMEOUT: 10000
+      DATA_BASE_POOL_MAX: 300
+      DATA_BASE_POOL_MIN: 100
       SMTP_HOST: ${SMTP_HOST}
       SMTP_PORT: ${SMTP_PORT}
       SMTP_USER: ${SMTP_USER}
