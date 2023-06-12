@@ -14,13 +14,21 @@ To know more about each library check their git repository.
 - docker
 - docker-compose
 
-## Usage: Hello World
-
-Download the stable version
+## Usage: Get last stable version
 
 ```sh
-bash one_click.sh build=true  latest_branch=true
+bash one_click.sh build=true  latest_branch=true custom_composer_file=docker-compose-init.yml
 ```
+
+This will store the mysql data in ${HOME}/mysql_data
+
+## Usage: Upgrade all except database
+
+```sh
+bash one_click.sh build=true  latest_branch=true custom_composer_file=docker-compose-previous-db.yml
+```
+
+This will store the mysql data in ${HOME}/mysql_data
 
 ## Usage: Integration Test
 
