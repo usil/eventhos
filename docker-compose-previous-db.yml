@@ -8,6 +8,7 @@ services:
       - "3306:3306"
     volumes:
       - ${HOME}/mysql_data:/var/lib/mysql
+      - ./mysql-mod/manage.sh:/home/manage      
     environment:
       MYSQL_ROOT_PASSWORD: ${MYSQL_PASSWORD:-changeme}
       MYSQL_PASSWORD: ${MYSQL_PASSWORD:-changeme}
