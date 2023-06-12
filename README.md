@@ -14,10 +14,19 @@ To know more about each library check their git repository.
 - docker
 - docker-compose
 
-## Usage: Get last stable version
+## Usage: Get last stable version (default secrets)
 
 ```sh
-bash one_click.sh build=true  latest_branch=true custom_composer_file=docker-compose-init.yml
+bash one_click.sh build=true  latest_branch=true custom_composer_file=docker-compose-init.yml 
+```
+
+This will store the mysql data in ${HOME}/mysql_data
+
+
+## Usage: Get last stable version (custom secrets)
+
+```sh
+bash one_click.sh build=true  latest_branch=true custom_composer_file=docker-compose-init.yml config_mode=expert
 ```
 
 This will store the mysql data in ${HOME}/mysql_data
