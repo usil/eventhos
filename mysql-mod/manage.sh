@@ -34,8 +34,9 @@ function export_db {
   echo "run this from host to get the file"
   filename=$(basename -- "$file_to_export")
   extension="${filename##*.}"
-  filename="${filename%.*}"  
-  echo "docker cp container:$file_to_export /foo/$filename.$extension"
+  filename="${filename%.*}"
+  container_id=$(cat /etc/hostname)
+  echo "docker cp $container_id:$file_to_export /foo/$filename.$extension"
 }
 
 function clear_db {
