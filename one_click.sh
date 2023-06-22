@@ -64,6 +64,7 @@ if [ -z "$skip_update_code" ] && [ ! "$skip_update_code" == "true" ]; then
       cd $workspace_location/$repository_name
       git fetch
       branch=$(git for-each-ref --sort=-committerdate | head -n 1 | awk -F '/' '{ print $NF }')
+      echo ">>>>>>>>>>> Latest branch: $branch"
       git checkout $branch
       git pull origin $branch
     else
@@ -125,7 +126,7 @@ case "$config_mode" in
 esac
 
 
-if [ "$save_database" == "true" ]; then
+if [ "$skip_database" == "true" ]; then
   docker-compose rm -s -v eventhos-web
   docker-compose rm -s -v eventhos-api
 else
@@ -137,13 +138,13 @@ if [ "$build" == "true" ]; then
   delete_image_if_exist "eventhos_eventhos-web"
   delete_image_if_exist "eventhos_eventhos-api"
 
-  if [ "$save_database" == "true" ]; then
+  if [ "$skip_database" == "true" ]; then
     docker-compose -f $composer_file up -d --build --force-recreate --no-deps eventhos-web eventhos-api
   else
     docker-compose -f $composer_file up -d --build --force-recreate --no-deps
   fi
 else
-  if [ "$save_database" == "true" ]; then
+  if [ "$skip_database" == "true" ]; then
     docker-compose  -f $composer_file up -d eventhos-web eventhos-api
   else
     docker-compose  -f $composer_file up -d

@@ -54,6 +54,7 @@ services:
       SMTP_DEFAULT_RECIPIENT: ${SMTP_DEFAULT_RECIPIENT}      
       LOG_LEVEL: ${LOG_LEVEL}
       RAW_SENSIBLE_PARAMS: access-key, authorization
+      SMTP_SUBJECT_MODE: Test
       TZ: America/Lima
     healthcheck:
       test: curl --fail http://localhost:2109 || exit 1
