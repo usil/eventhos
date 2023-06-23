@@ -2,7 +2,6 @@ version: "3.7"
 services:
   eventhos-db:
     image: mysql:5.7
-    command: mysqld --sql_mode="" --max_connections=1100 --general-log=1 --general-log-file=/tmp/mysql-general-log.log
     container_name: eventhos-db
     ports:
       - "3306:3306"
@@ -20,9 +19,9 @@ services:
         limits:
           memory: 512M
     healthcheck:
-      test: 'cat /tmp/mysql-general-log.log | grep "root@localhost on  using Socket"'
-      interval: 10s
-      retries: 120
+        test: ["CMD", "mysqladmin" ,"ping", "-h", "localhost"]
+        timeout: 20s
+        retries: 10
   eventhos-api:
     build:
       context: ./eventhos-api
@@ -46,6 +45,7 @@ services:
       DATA_BASE_POOL_MIN: 100
       SMTP_HOST: ${SMTP_HOST}
       SMTP_PORT: ${SMTP_PORT}
+      SMTP_FROM_ALIAS: ${SMTP_CREDENTIAL_USER}
       SMTP_CREDENTIAL_USER: ${SMTP_CREDENTIAL_USER}
       SMTP_CREDENTIAL_PASSWORD: ${SMTP_CREDENTIAL_PASSWORD}
       SMTP_ENABLE_SSL: ${SMTP_ENABLE_SSL}
@@ -53,7 +53,7 @@ services:
       SMTP_DEFAULT_RECIPIENT: ${SMTP_DEFAULT_RECIPIENT}      
       LOG_LEVEL: ${LOG_LEVEL}
       RAW_SENSIBLE_PARAMS: access-key, authorization
-      SMTP_SUBJECT_MODE: Test
+      ENVIRONMENT_ALIAS: Test
       TZ: America/Lima
     healthcheck:
       test: curl --fail http://localhost:2109 || exit 1
