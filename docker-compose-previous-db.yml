@@ -2,6 +2,7 @@ version: "3.7"
 services:
   eventhos-db:
     image: mysql:5.7
+    command: mysqld --sql_mode="" --max_connections=1100
     container_name: eventhos-db
     ports:
       - "3306:3306"
