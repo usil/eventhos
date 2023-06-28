@@ -4,7 +4,8 @@ const express = require("express");
 const createServer = () => {
   let parsedReq = {};
   const calledTimes = [];
-  let timesCalled = 0;
+  let timesCalled = 0;;
+  let parsedReqCustomLogic = {};
 
   const app = express();
 
@@ -50,6 +51,7 @@ const createServer = () => {
 
   app.get("/clean", (_req, res) => {
     parsedReq = {};
+    parsedReqCustomLogic = {}
     calledTimes.length = 0;
     timesCalled = 0;
     return res.json({ message: "cleanup completed" });
@@ -58,7 +60,22 @@ const createServer = () => {
   app.post("/error", (_req, res) => {
     res.status(500);
     return res.json({ message: "error" });
-  })
+  });
+
+  app.post("/custom-logic", (req, res) => {
+    parsedReqCustomLogic = {
+      body: req.body,
+      message: "modified"
+    }
+    return res.json({
+      content: parsedReqCustomLogic,
+    });
+  });
+  app.get("/custom-logic", (req, res) => {
+    return res.json({
+      content: parsedReqCustomLogic,
+    });
+  });
 
   return app;
 };
