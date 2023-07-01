@@ -2,12 +2,13 @@ version: "3.7"
 services:
   eventhos-db:
     image: mysql:5.7
-    command: mysqld --sql_mode="" --max_connections=1100 --general-log=1 --general-log-file=/tmp/mysql-general-log.log
+    command: mysqld --sql_mode="" --max_connections=1100
     container_name: eventhos-db
     ports:
       - "3306:3306"
     volumes:
-      - ./eventhos-api/database:/docker-entrypoint-initdb.d
+      - ${HOME}/mysql_data:/var/lib/mysql
+      - ./mysql-mod/manage.sh:/home/manage
     environment:
       MYSQL_ROOT_PASSWORD: ${MYSQL_PASSWORD:-changeme}
       MYSQL_PASSWORD: ${MYSQL_PASSWORD:-changeme}
@@ -19,9 +20,9 @@ services:
         limits:
           memory: 512M
     healthcheck:
-      test: 'cat /tmp/mysql-general-log.log | grep "root@localhost on  using Socket"'
-      interval: 20s
-      retries: 120
+        test: ["CMD", "mysqladmin" ,"ping", "-h", "localhost"]
+        timeout: 20s
+        retries: 10
   eventhos-api:
     build:
       context: ./eventhos-api

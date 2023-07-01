@@ -82,6 +82,16 @@ clientsecret:
 QxYOwrpicnKCYyV1lXGhMoUL2JyUbMTr
 ```
 
+## Database Backup
+
+docker inspect eventhos-db | grep  MYSQL_ROOT_PASSWORD
+
+docker exec -it eventhos-db bash /home/manage operation=export_db user=root database_name=eventhos
+
+/home/ubuntu/backup/eventhos-2023-07-01_09-12-47.sql
+
+- /home/ubuntu/backup/2023-06-22_12-30-35:/docker-entrypoint-initdb.d
+
 ## Contributors
 
 <table>
