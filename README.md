@@ -34,7 +34,7 @@ This will store the mysql data in ${HOME}/mysql_data
 ## Usage: Upgrade all except database
 
 ```sh
-bash one_click.sh build=true  latest_branch=true custom_composer_file=docker-compose-previous-db.yml
+bash one_click.sh build=true  latest_branch=true custom_composer_file=docker-compose-previous-db.yml config_mode=expert
 ```
 
 This will store the mysql data in ${HOME}/mysql_data
