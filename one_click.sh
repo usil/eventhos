@@ -64,7 +64,7 @@ if [ -z "$skip_update_code" ] && [ ! "$skip_update_code" == "true" ]; then
       cd $workspace_location/$repository_name
       git fetch
       branch=$(git for-each-ref --sort=-committerdate | head -n 1 | awk -F '/' '{ print $NF }')
-      echo ">>>>>>>>>>> Latest branch: $branch"
+      echo -e "\n>>>>>>>>>>> Latest branch: $branch\n"
       git checkout $branch
       git pull origin $branch
     else
@@ -86,10 +86,10 @@ composer_file=
 if [ ! -z "$custom_composer_file" ]; then
   composer_file=$custom_composer_file
 else
-  composer_file=docker-compose.yml
+  composer_file=docker compose.yml
 fi
 
-echo "docker-compose file: $composer_file"
+echo "docker compose file: $composer_file"
 
 
 if [ -z "${config_mode}" ]; then
@@ -125,12 +125,13 @@ case "$config_mode" in
   *)
 esac
 
+echo "Delete containers and images"
 
 if [ "$skip_database" == "true" ]; then
-  docker-compose rm -s -v eventhos-web
-  docker-compose rm -s -v eventhos-api
+  docker compose rm -s -v eventhos-web
+  docker compose rm -s -v eventhos-api
 else
-  docker-compose -f $composer_file down    
+  docker compose -f $composer_file down    
 fi
 
 # https://stackoverflow.com/a/50850881
@@ -139,15 +140,15 @@ if [ "$build" == "true" ]; then
   delete_image_if_exist "eventhos_eventhos-api"
 
   if [ "$skip_database" == "true" ]; then
-    docker-compose -f $composer_file up -d --build --force-recreate --no-deps eventhos-web eventhos-api
+    docker compose -f $composer_file up -d --build --force-recreate --no-deps eventhos-web eventhos-api
   else
-    docker-compose -f $composer_file up -d --build --force-recreate --no-deps
+    docker compose -f $composer_file up -d --build --force-recreate --no-deps
   fi
 else
   if [ "$skip_database" == "true" ]; then
-    docker-compose  -f $composer_file up -d eventhos-web eventhos-api
+    docker compose  -f $composer_file up -d eventhos-web eventhos-api
   else
-    docker-compose  -f $composer_file up -d
+    docker compose  -f $composer_file up -d
   fi
   
 fi

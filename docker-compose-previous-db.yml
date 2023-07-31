@@ -20,7 +20,7 @@ services:
         limits:
           memory: 512M
     healthcheck:
-        test: ["CMD", "mysqladmin" ,"ping", "-h", "localhost"]
+        test: ["CMD", 'mysqladmin', 'ping', '-h', 'localhost', '-u', 'root', '-p$MYSQL_ROOT_PASSWORD' ]
         timeout: 20s
         retries: 10
   eventhos-api:
@@ -53,7 +53,7 @@ services:
       SMTP_TLS_CIPHERS: SSLv3
       SMTP_DEFAULT_RECIPIENT: ${SMTP_DEFAULT_RECIPIENT}      
       LOG_LEVEL: ${LOG_LEVEL}
-      RAW_SENSIBLE_PARAMS: ${RAW_SENSIBLE_PARAMS}
+      RAW_SENSIBLE_PARAMS: access-key,authorization
       ENVIRONMENT_ALIAS: Test
       TZ: America/Lima
     healthcheck:

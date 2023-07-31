@@ -54,7 +54,7 @@ services:
       SMTP_TLS_CIPHERS: SSLv3
       SMTP_DEFAULT_RECIPIENT: ${SMTP_DEFAULT_RECIPIENT}      
       LOG_LEVEL: ${LOG_LEVEL}
-      RAW_SENSIBLE_PARAMS: access-key, authorization
+      RAW_SENSIBLE_PARAMS: access-key,authorization
       ENVIRONMENT_ALIAS: Test
       TZ: America/Lima
     healthcheck:
@@ -94,7 +94,7 @@ services:
     deploy:
       resources:
         limits:
-          memory: 128M
+          memory: 128M  
 
 networks:
   app_network:
