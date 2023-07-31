@@ -55,13 +55,13 @@ if [ -z "$skip_update_code" ] && [ ! "$skip_update_code" == "true" ]; then
 
     echo "repository_name: $repository_name"
 
-    rm -rf $workspace_location/$repository_name
+    rm -rf "$workspace_location/$repository_name"
 
-    cd $workspace_location
+    cd "$workspace_location"
     if [ "$latest_branch" == "true" ]; then
       echo "git clone $git_repository_url"
       git clone $git_repository_url
-      cd $workspace_location/$repository_name
+      cd "$workspace_location/$repository_name"
       git fetch
       branch=$(git for-each-ref --sort=-committerdate | head -n 1 | awk -F '/' '{ print $NF }')
       echo -e "\n>>>>>>>>>>> Latest branch: $branch\n"
@@ -80,7 +80,7 @@ fi
 echo "#################"
 echo "Launching"
 echo "#################"
-cd $workspace_location
+cd "$workspace_location"
 
 composer_file=
 if [ ! -z "$custom_composer_file" ]; then
