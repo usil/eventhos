@@ -91,4 +91,5 @@ fi
 
 echo "docker compose file: $composer_file"
 
+export $(cat .env | xargs)
 docker-compose up -d --build $service_to_update
