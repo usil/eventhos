@@ -91,4 +91,4 @@ fi
 
 echo "docker compose file: $composer_file"
 
-docker compose up -d --build $service_to_update
+docker-compose up -d --build $service_to_update

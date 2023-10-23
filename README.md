@@ -39,6 +39,13 @@ bash one_click.sh build=true  latest_branch=true custom_composer_file=docker-com
 
 This will store the mysql data in ${HOME}/mysql_data
 
+
+## Usage: Upgrade 01 container
+
+```sh
+bash update.sh latest_branch=true custom_composer_file=docker-compose-previous-db.yml service_to_update=eventhos-api
+```
+
 ## Usage: Integration Test
 
 ```sh
