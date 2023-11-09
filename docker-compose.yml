@@ -1,28 +1,33 @@
 version: "3.7"
 services:
   eventhos-db:
-    image: mysql:5.7
+    build:
+      context: ./mysql-mod
+      dockerfile: Dockerfile
+    image: mysql-mod:5.7
+    container_name: mysql-db
     command: mysqld --sql_mode="" --max_connections=1100 --general-log=1 --general-log-file=/tmp/mysql-general-log.log
-    container_name: eventhos-db
+    restart: unless-stopped
     ports:
       - "3306:3306"
     volumes:
       - ./eventhos-api/database:/docker-entrypoint-initdb.d
-      - ${HOME}/mysql_data:/var/lib/mysql
+      - ${HOME}/mysql_eventhos:/var/lib/mysql
     environment:
       MYSQL_ROOT_PASSWORD: ${MYSQL_PASSWORD:-changeme}
       MYSQL_PASSWORD: ${MYSQL_PASSWORD:-changeme}
       MYSQL_USER: "usr_eventhos"
       MYSQL_DATABASE: "eventhos"
-      TZ: America/Lima
+      TZ: America/Lima      
     deploy:
       resources:
         limits:
           memory: 512M
     healthcheck:
-      test: 'cat /tmp/mysql-general-log.log | grep "root@localhost on  using Socket"'
+      test: 'cat /tmp/mysql-general-log.log | grep "[MYSQL_READY]"'
       interval: 10s
       retries: 120
+
   eventhos-api:
     build:
       context: ./eventhos-api
@@ -46,11 +51,15 @@ services:
       DATA_BASE_POOL_MIN: 100
       SMTP_HOST: ${SMTP_HOST}
       SMTP_PORT: ${SMTP_PORT}
-      SMTP_USER: ${SMTP_USER}
-      SMTP_PASSWORD: ${SMTP_PASSWORD}
-      SMTP_SECURE: ${SMTP_SECURE}
+      SMTP_FROM_ALIAS: ${SMTP_CREDENTIAL_USER}
+      SMTP_CREDENTIAL_USER: ${SMTP_CREDENTIAL_USER}
+      SMTP_CREDENTIAL_PASSWORD: ${SMTP_CREDENTIAL_PASSWORD}
+      SMTP_ENABLE_SSL: ${SMTP_ENABLE_SSL}
       SMTP_TLS_CIPHERS: SSLv3
       SMTP_DEFAULT_RECIPIENT: ${SMTP_DEFAULT_RECIPIENT}      
+      LOG_LEVEL: ${LOG_LEVEL:-info}
+      RAW_SENSIBLE_PARAMS: access-key,authorization
+      ENVIRONMENT_ALIAS: Test
       TZ: America/Lima
     healthcheck:
       test: curl --fail http://localhost:2109 || exit 1
@@ -89,7 +98,7 @@ services:
     deploy:
       resources:
         limits:
-          memory: 128M
+          memory: 128M  
 
 networks:
   app_network:

@@ -1,6 +1,10 @@
 # Eventhos
 
-This repository implements an easy way to deploy in docker the 3 parts of the eventhos system, _data base, api and web_.
+This repository offer an easy way to deploy 3 parts of the eventhos system using docker
+
+- data base
+- api
+- web
 
 ## Git repositories
 
@@ -12,52 +16,52 @@ To know more about each library check their git repository.
 ## Requeriments
 
 - docker
-- docker-compose
+- docker compose
+
+For windows users, check https://github.com/usil/eventhos/wiki/Windows-Users
 
 ## Usage: Get last stable version (default secrets)
 
 ```sh
-bash one_click.sh build=true  latest_branch=true custom_composer_file=docker-compose-init.yml 
+bash one_click.sh build=true  latest_branch=true custom_composer_file=docker-compose.yml 
 ```
 
-This will store the mysql data in ${HOME}/mysql_data
-
+Run this anytime you need to get the lastest version
 
 ## Usage: Get last stable version (custom secrets)
 
+Add the param `config_mode=expert`
+
 ```sh
-bash one_click.sh build=true  latest_branch=true custom_composer_file=docker-compose-init.yml config_mode=expert
+bash one_click.sh build=true  latest_branch=true custom_composer_file=docker-compose.yml config_mode=expert 
 ```
 
-This will store the mysql data in ${HOME}/mysql_data
-
-## Usage: Upgrade all except database
+## Usage: Update all except database
 
 ```sh
-bash one_click.sh build=true  latest_branch=true custom_composer_file=docker-compose-previous-db.yml config_mode=expert
+bash one_click.sh build=true  latest_branch=true custom_composer_file=docker-compose.yml skip_database=true
 ```
 
-This will store the mysql data in ${HOME}/mysql_data
-
-
-## Usage: Upgrade 01 container
+## Usage: Force clean startup
 
 ```sh
-bash update.sh latest_branch=true custom_composer_file=docker-compose-previous-db.yml service_to_update=eventhos-api
+bash one_click.sh build=true  latest_branch=true custom_composer_file=docker-compose.yml force_clean_startup=true
+```
+
+This will delete the mysql data in ${HOME}/mysql_eventhos folder
+
+Be careful!!!
+
+## Usage: Upgrade only one container
+
+```sh
+bash one_click.sh latest_branch=true custom_composer_file=docker-compose.yml service_to_update=eventhos-web operation=update
 ```
 
 ## Usage: Integration Test
 
 ```sh
 bash one_click.sh  custom_composer_file=docker-compose-integration-tests.yml  build=true latest_branch=true
-```
-
-## Previous containers
-
-If you have previous executions of docker-compose and you don't have any other container in this server, you could execute this to :pushpin: **REMOVE ALL THE CONTAINER IN THIS MACHINE ** :pushpin:
-
-```
-docker ps -aq | xargs docker stop | xargs docker rm
 ```
 
 ## Home Page
@@ -91,13 +95,9 @@ QxYOwrpicnKCYyV1lXGhMoUL2JyUbMTr
 
 ## Database Backup
 
-docker inspect eventhos-db | grep  MYSQL_ROOT_PASSWORD
-
-docker exec -it eventhos-db bash /home/manage operation=export_db user=root database_name=eventhos
-
-/home/ubuntu/backup/eventhos-2023-07-01_09-12-47.sql
-
-- /home/ubuntu/backup/2023-06-22_12-30-35:/docker-entrypoint-initdb.d
+```
+docker exec -it eventhos-db bash /usr/local/bin/manage.sh operation=export_db user=root database_name=eventhos
+```
 
 ## Contributors
 

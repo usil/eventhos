@@ -91,6 +91,28 @@ fi
 
 echo "docker compose file: $composer_file"
 
+if [ "$force_clean_startup" == "true" ]; then
+  read -p "Are you sure you want a clean startup? This will delete all your mysql data and the .env file (yes|no): " answer
+  if [ "$answer" == "yes" ]; then
+    sudo rm -rf ${HOME}/mysql_eventhos
+    rm -f $workspace_location/.env
+  fi
+fi
+
+if [ "$operation" == "update" ]; then
+  echo "#################"
+  echo "Updatig: $service_to_update"
+  echo "#################"
+  if [ ! -f $workspace_location/.env ]; then
+    if [ -s $workspace_location/.env ]; then
+      export $(cat .env | xargs)
+    fi
+  fi  
+  docker compose up -d --build $service_to_update
+  exit 0  
+fi
+
+# we are in the create mode
 
 if [ -z "${config_mode}" ]; then
   export config_mode=default
@@ -100,9 +122,6 @@ case "$config_mode" in
 
   default)
     echo  "config mode: default"
-    export JWT_SECRET=$(uuidgen)
-    export CRYPTO_KEY=$(uuidgen)
-    export MYSQL_PASSWORD=$(uuidgen)
     local_ip="$(hostname -I | awk '{print $1}')"
     export EVENTHOS_API_BASE_URL=http://$local_ip:2109
     ;;
