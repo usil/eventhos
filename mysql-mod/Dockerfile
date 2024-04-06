@@ -1,6 +1,6 @@
 FROM mysql:5.7
 
-COPY manage.sh /home/manage/
+COPY manage.sh /usr/local/bin/
 
 COPY docker-entrypoint.sh /usr/local/bin/
 RUN rm /entrypoint.sh

@@ -1,28 +1,38 @@
 version: "3.7"
 services:
-  eventhos-web:
+  eventhos-db:
     build:
-      context: ./eventhos-web
+      context: ./mysql-mod
       dockerfile: Dockerfile
-    container_name: eventhos-web
+    image: mysql-mod:5.7
+    container_name: eventhos-db
+    command: mysqld --sql_mode="" --max_connections=1100 --general-log=1 --general-log-file=/tmp/mysql-general-log.log
     ports:
-      - "2110:2110"
+      - "3306:3306"
+    volumes:
+      - ./eventhos-api/database/latest:/docker-entrypoint-initdb.d
     environment:
-      URL: http://localhost:2109
-    depends_on:
-      eventhos-api:
-        condition: service_healthy
-    networks:
-      - app_network
-    extra_hosts:
-      - "host.docker.internal:host-gateway"
+      MYSQL_ROOT_PASSWORD: ${MYSQL_PASSWORD:-changeme}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD:-changeme}
+      MYSQL_USER: "usr_eventhos"
+      MYSQL_DATABASE: "eventhos"
+      TZ: America/Lima
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+    healthcheck:
+      test: 'cat /tmp/mysql-general-log.log | grep "[MYSQL_READY]"'
+      interval: 10s
+      retries: 120
+
   eventhos-api:
     build:
       context: ./eventhos-api
       dockerfile: Dockerfile
     container_name: eventhos-api
     ports:
-      - "2109:2109"
+      - "${EVENTHOS_API_PORT:-2109}:2109"
     environment:
       USE_QUEUE: true
       QUEUE_HOST: host.docker.internal
@@ -30,20 +40,33 @@ services:
       QUEUE_USER: eventhos
       QUEUE_PASSWORD: secret
       QUEUE_DESTINATION: eventhos
-      QUEUE_HEART_BEAT: 0,0
-      DATA_BASE_NAME: "eventhos"
-      DATA_BASE_HOST: host.docker.internal
-      DATA_BASE_PORT: 3306
-      DATA_BASE_USER: "usr_eventhos"
-      DATA_BASE_PASSWORD: "abcdefg"
-      NODE_ENV: "production"
-      CPU_COUNT: 3
-      PORT: 2109
-      JWT_SECRET: "secret"
-      CRYPTO_KEY: "secret_key"
+      QUEUE_HEART_BEAT: 0,0    
+      CPU_COUNT: 1
+      CRYPTO_KEY: ${CRYPTO_KEY:-changeme}
       DATA_BASE_ACQUIRE_CONNECTION_TIMEOUT: 10000
+      DATA_BASE_HOST: host.docker.internal
+      DATA_BASE_NAME: "eventhos"
+      DATA_BASE_PASSWORD: ${MYSQL_PASSWORD:-changeme}
       DATA_BASE_POOL_MAX: 300
       DATA_BASE_POOL_MIN: 100
+      DATA_BASE_PORT: 3306
+      DATA_BASE_TIMEZONE: "+00:00"
+      DATA_BASE_USER: "usr_eventhos"
+      ENVIRONMENT_ALIAS: Integration      
+      JWT_SECRET: ${JWT_SECRET:-changeme}
+      LOG_LEVEL: ${LOG_LEVEL:-info}
+      NODE_ENV: "production"
+      PORT: 2109
+      RAW_SENSIBLE_PARAMS: access-key,authorization
+      SMTP_CREDENTIAL_PASSWORD: changeme
+      SMTP_CREDENTIAL_USER: admin@mail.com
+      SMTP_DEFAULT_RECIPIENT: jane@mail.com
+      SMTP_ENABLE_SSL: false
+      SMTP_FROM_ALIAS: admin
+      SMTP_HOST: host.docker.internal
+      SMTP_PORT: 1025
+      SMTP_TLS_CIPHERS: SSLv3
+      TZ: America/Lima
     healthcheck:
       test: curl --fail http://localhost:2109 || exit 1
       interval: 10s
@@ -53,6 +76,8 @@ services:
     depends_on:
       eventhos-db:
         condition: service_healthy
+      fake-smtp-server:
+        condition: service_healthy        
     networks:
       - app_network
     extra_hosts:
@@ -60,29 +85,45 @@ services:
     deploy:
       resources:
         limits:
-          memory: 1024M
-  eventhos-db:
-    image: mysql:5.7
-    command: mysqld --sql_mode="" --max_connections=1100 --general-log=1 --general-log-file=/var/log/mysql/general-log.log
-    container_name: eventhos-db
+          memory: 512M
+
+  eventhos-web:
+    build:
+      context: ./eventhos-web
+      dockerfile: Dockerfile
+    container_name: eventhos-web
     ports:
-      - "3306:3306"
-    volumes:
-      - ./eventhos-api/database:/docker-entrypoint-initdb.d
+      - "${EVENTHOS_WEB_PORT:-2110}:2110"
     environment:
-      MYSQL_ROOT_PASSWORD: "abcdefg"
-      MYSQL_PASSWORD: "abcdefg"
-      MYSQL_USER: "usr_eventhos"
-      MYSQL_DATABASE: "eventhos"
+      EVENTHOS_API_BASE_URL: "${EVENTHOS_API_BASE_URL:-http://localhost:2109}"
       TZ: America/Lima
+    depends_on:
+      eventhos-api:
+        condition: service_healthy
+    networks:
+      - app_network
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     deploy:
       resources:
         limits:
-          memory: 1024M
+          memory: 128M  
+
+  fake-smtp-server:
+    image: haravich/fake-smtp-server:1.0.1
+    container_name: fake-smtp-server
+    ports:
+      - '1025:1025'
+      - '1080:1080'
+    environment:
+      TZ: America/Lima
     healthcheck:
-      test: 'cat /var/log/mysql/general-log.log | grep "root@localhost on  using Socket"'
-      interval: 1s
-      retries: 120
+      test: wget --no-verbose --tries=1 --spider http://localhost:1080 || exit 1
+      interval: 10s
+      retries: 100
+      start_period: 20s
+      timeout: 10s       
+
   eventhos-activemq:
     image: webcenter/activemq:latest
     container_name: activemq
@@ -101,27 +142,8 @@ services:
       ACTIVEMQ_GROUPS_owners: eventhos
       JAVA_OPTS: -Dfile.encoding=UTF-8
       TZ: America/Lima
-    restart: always
-  mock-api:
-    build:
-      context: ./mock-api
-      dockerfile: Dockerfile
-    container_name: mock-api
-    ports:
-      - "9000:9000"
-    environment:
-      PORT: "9000"
-    depends_on:
-      eventhos-api:
-        condition: service_healthy
-    networks:
-      - app_network
-    extra_hosts:
-      - "host.docker.internal:host-gateway"
-    deploy:
-      resources:
-        limits:
-          memory: 128M    
+    restart: always 
+
 networks:
   app_network:
     driver: bridge

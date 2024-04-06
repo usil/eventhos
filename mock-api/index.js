@@ -5,6 +5,7 @@ const createServer = () => {
   let parsedReq = {};
   const calledTimes = [];
   let timesCalled = 0;
+  var receivedBodyOfCustomLogic;
 
   const app = express();
 
@@ -59,6 +60,15 @@ const createServer = () => {
     res.status(500);
     return res.json({ message: "error" });
   })
+
+  app.post("/custom-logic", (_req, res) => {
+    receivedBodyOfCustomLogic = _req.body
+    return res.json({code:200});
+  });
+
+  app.get("/custom-logic", (_req, res) => {
+    return res.json({content:receivedBodyOfCustomLogic});
+  });
 
   return app;
 };

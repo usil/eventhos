@@ -1,14 +1,16 @@
 version: "3.7"
 services:
   eventhos-db:
-    image: mysql:5.7
-    command: mysqld --sql_mode="" --max_connections=1100
+    build:
+      context: ./mysql-mod
+      dockerfile: Dockerfile
+    image: mysql-mod:5.7
     container_name: eventhos-db
+    command: mysqld --sql_mode="" --max_connections=1100 --general-log=1 --general-log-file=/tmp/mysql-general-log.log
     ports:
       - "3306:3306"
     volumes:
-      - ${HOME}/mysql_data:/var/lib/mysql
-      - ./mysql-mod/manage.sh:/home/manage
+      - ./eventhos-api/database/latest:/docker-entrypoint-initdb.d
     environment:
       MYSQL_ROOT_PASSWORD: ${MYSQL_PASSWORD:-changeme}
       MYSQL_PASSWORD: ${MYSQL_PASSWORD:-changeme}
@@ -20,9 +22,10 @@ services:
         limits:
           memory: 512M
     healthcheck:
-        test: ["CMD", "mysqladmin" ,"ping", "-h", "localhost"]
-        timeout: 20s
-        retries: 10
+      test: 'cat /tmp/mysql-general-log.log | grep "[MYSQL_READY]"'
+      interval: 10s
+      retries: 120
+
   eventhos-api:
     build:
       context: ./eventhos-api
@@ -31,30 +34,31 @@ services:
     ports:
       - "${EVENTHOS_API_PORT:-2109}:2109"
     environment:
-      DATA_BASE_NAME: "eventhos"
-      DATA_BASE_HOST: host.docker.internal
-      DATA_BASE_PORT: 3306
-      DATA_BASE_USER: "usr_eventhos"
-      DATA_BASE_PASSWORD: ${MYSQL_PASSWORD:-changeme}
-      NODE_ENV: "production"
       CPU_COUNT: 1
-      PORT: 2109
-      JWT_SECRET: ${JWT_SECRET:-changeme}
       CRYPTO_KEY: ${CRYPTO_KEY:-changeme}
       DATA_BASE_ACQUIRE_CONNECTION_TIMEOUT: 10000
+      DATA_BASE_HOST: host.docker.internal
+      DATA_BASE_NAME: "eventhos"
+      DATA_BASE_PASSWORD: ${MYSQL_PASSWORD:-changeme}
       DATA_BASE_POOL_MAX: 300
       DATA_BASE_POOL_MIN: 100
-      SMTP_HOST: ${SMTP_HOST}
-      SMTP_PORT: ${SMTP_PORT}
-      SMTP_FROM_ALIAS: ${SMTP_CREDENTIAL_USER}
-      SMTP_CREDENTIAL_USER: ${SMTP_CREDENTIAL_USER}
-      SMTP_CREDENTIAL_PASSWORD: ${SMTP_CREDENTIAL_PASSWORD}
-      SMTP_ENABLE_SSL: ${SMTP_ENABLE_SSL}
-      SMTP_TLS_CIPHERS: SSLv3
-      SMTP_DEFAULT_RECIPIENT: ${SMTP_DEFAULT_RECIPIENT}      
-      LOG_LEVEL: ${LOG_LEVEL}
+      DATA_BASE_PORT: 3306
+      DATA_BASE_TIMEZONE: "+00:00"
+      DATA_BASE_USER: "usr_eventhos"
+      ENVIRONMENT_ALIAS: Integration      
+      JWT_SECRET: ${JWT_SECRET:-changeme}
+      LOG_LEVEL: ${LOG_LEVEL:-info}
+      NODE_ENV: "production"
+      PORT: 2109
       RAW_SENSIBLE_PARAMS: access-key,authorization
-      ENVIRONMENT_ALIAS: Test
+      SMTP_CREDENTIAL_PASSWORD: changeme
+      SMTP_CREDENTIAL_USER: admin@mail.com
+      SMTP_DEFAULT_RECIPIENT: jane@mail.com
+      SMTP_ENABLE_SSL: false
+      SMTP_FROM_ALIAS: admin
+      SMTP_HOST: host.docker.internal
+      SMTP_PORT: 1025
+      SMTP_TLS_CIPHERS: SSLv3
       TZ: America/Lima
     healthcheck:
       test: curl --fail http://localhost:2109 || exit 1
@@ -65,6 +69,8 @@ services:
     depends_on:
       eventhos-db:
         condition: service_healthy
+      fake-smtp-server:
+        condition: service_healthy        
     networks:
       - app_network
     extra_hosts:
@@ -73,6 +79,7 @@ services:
       resources:
         limits:
           memory: 512M
+
   eventhos-web:
     build:
       context: ./eventhos-web
@@ -93,7 +100,23 @@ services:
     deploy:
       resources:
         limits:
-          memory: 128M
+          memory: 128M  
+
+  fake-smtp-server:
+    image: haravich/fake-smtp-server:1.0.1
+    container_name: fake-smtp-server
+    ports:
+      - '1025:1025'
+      - '1080:1080'
+    environment:
+      TZ: America/Lima
+    healthcheck:
+      test: wget --no-verbose --tries=1 --spider http://localhost:1080 || exit 1
+      interval: 10s
+      retries: 100
+      start_period: 20s
+      timeout: 10s        
+
   mock-api:
     build:
       context: ./mock-api

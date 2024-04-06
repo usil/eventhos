@@ -92,7 +92,7 @@ fi
 echo "docker compose file: $composer_file"
 
 if [ "$force_clean_startup" == "true" ]; then
-  read -p "Are you sure you want a clean startup? This will delete all your mysql data and the .env file (yes|no): " answer
+  read -p "Are you sure you want a clean startup? This will delete all your mysql data(${HOME}/mysql_eventhos) and the .env file (yes|no): " answer
   if [ "$answer" == "yes" ]; then
     sudo rm -rf ${HOME}/mysql_eventhos
     rm -f $workspace_location/.env
